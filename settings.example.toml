@@ -1,0 +1,6 @@
+WIFI_SSID = "WIFI SSID HERE"
+WIFI_PASSWORD = "mywifipassword"
+
+# code for web workflow
+CIRCUITPY_WEB_API_PASSWORD="webapipassword"
+CIRCUITPY_WEB_API_PORT=8080

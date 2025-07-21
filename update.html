@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Milk's Cat Feeder | Update</title>
+    </head>
+
+    <body>
+        <section class="content">
+            <h1>Milk's Cat Feeder</h1>
+            <p>Current Feeding Time:</p>
+            <p id="feeding-time"></p>
+            <p>Update Feeding Time:</p>
+            <input type="time" id="new-feeding-time">
+            <button id="submit-feeding-time">Update</button>
+        </section>
+
+        <script type="text/javascript">
+            const timeLabel = document.querySelector("#feeding-time")
+
+            const feedingTimeRequest = new XMLHttpRequest()
+            feedingTimeRequest.onreadystatechange = () => {
+                if (feedingTimeRequest.readyState == 4 && feedingTimeRequest.status == 200) {
+                    timeLabel.innerText = feedingTimeRequest.responseText
+                }
+            }
+            feedingTimeRequest.open("GET", "/feeding-time")
+            feedingTimeRequest.send()
+
+            const timeSelector = document.querySelector("#new-feeding-time")
+
+            document.querySelector("#submit-feeding-time").addEventListener('click', () => {
+                if (timeSelector.value === '') return
+
+                const updateFeedTimeRequest = new XMLHttpRequest()
+                updateFeedTimeRequest.open("POST", "/set-feeding-time")
+                updateFeedTimeRequest.send(timeSelector.value)
+            })
+        </script>
+    </body>
+</html>

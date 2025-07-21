@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Milk's Cat Feeder</title>
+    </head>
+
+    <body>
+        <section class="content">
+            <h1>Milk's Cat Feeder</h1>
+            <p>Current Time:</p>
+            <p id="current-time"></p>
+            <p>System Time:</p>
+            <p id="system-time"></p>
+            <p>Feeding Time:</p>
+            <p id="feeding-time"></p>
+        </section>
+
+        <script type="text/javascript">
+            const timeLabels = {
+                "current": document.querySelector("#current-time"),
+                "system": document.querySelector("#system-time"),
+                "feeding": document.querySelector("#feeding-time")
+            }
+
+            const currentDate = new Date()
+            let currentMinutes = String(currentDate.getMinutes())
+            if (currentMinutes.length === 1) currentMinutes = `0${currentMinutes}`
+            timeLabels["current"].innerText = `${currentDate.getHours()}:${currentMinutes}`
+
+            const systemTimeRequest = new XMLHttpRequest()
+            systemTimeRequest.onreadystatechange = () => {
+                if (systemTimeRequest.readyState == 4 && systemTimeRequest.status == 200) {
+                    timeLabels["system"].innerText = systemTimeRequest.responseText
+                }
+            }
+            systemTimeRequest.open("GET", "/server-time")
+            systemTimeRequest.send()
+
+            const feedingTimeRequest = new XMLHttpRequest()
+            feedingTimeRequest.onreadystatechange = () => {
+                if (feedingTimeRequest.readyState == 4 && feedingTimeRequest.status == 200) {
+                    timeLabels["feeding"].innerText = feedingTimeRequest.responseText
+                }
+            }
+            feedingTimeRequest.open("GET", "/feeding-time")
+            feedingTimeRequest.send()
+        </script>
+    </body>
+</html>
