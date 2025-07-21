@@ -59,11 +59,14 @@ def checkFeedTime():
     feeding_minute = int(split_feeding_time[1])
 
     current_time = time.localtime()
-    # ((a and b) or c or (d and e)) and f and g
-    if ((last_feed_month == 12 and current_time[1]) == 1
-            or last_feed_month < current_time[1]
-            or last_feed_day < current_time[2]) \
-            and feeding_hour <= current_time[3] \
-            and feeding_minute <= current_time[4]:
 
-        dispenceFood(next_feeding_time)
+    last_feed_yesterday = (last_feed_month == 12 and current_time[1] == 1) \
+        or last_feed_month < current_time[1] \
+        or last_feed_day < current_time[2]
+
+    if feeding_hour <= current_time[3] and feeding_minute <= current_time[4]:
+        if last_feed_time == next_feeding_time:
+            if last_feed_yesterday:
+                dispenceFood(next_feeding_time)
+        else:
+            dispenceFood(next_feeding_time)
