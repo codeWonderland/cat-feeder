@@ -5,7 +5,7 @@ import adafruit_ntp
 import rtc
 import time
 
-from adafruit_httpserver.server import HTTPServer
+from adafruit_httpserver.server import Server
 from ServerRoutes import RoutingProtocol
 from FoodManager import checkFeedTime
 
@@ -18,7 +18,7 @@ print("Connected to", ssid)
 
 # set up socketpool and server
 pool = socketpool.SocketPool(wifi.radio)
-server = HTTPServer(pool)
+server = Server(pool)
 
 # sync system time with EDT
 my_tz_offset = -4  # EDT

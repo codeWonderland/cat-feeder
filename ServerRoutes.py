@@ -1,9 +1,10 @@
 import time
 
-from adafruit_httpserver.methods import HTTPMethod
-from adafruit_httpserver.mime_type import MIMEType
-from adafruit_httpserver.request import HTTPRequest
-from adafruit_httpserver.response import HTTPResponse
+from adafruit_httpserver import (
+    methods,
+    Request,
+    Response
+)
 
 from StorageProtocol import StorageProtocol
 from FoodManager import dispenceFood, getLastFeedingData, getNextFeedingTime
@@ -15,26 +16,26 @@ class RoutingProtocol:
         # === HTML Routes ===
 
         @server.route("/")
-        def base(request: HTTPRequest):
-            with HTTPResponse(
+        def base(request: Request):
+            with Response(
                     request,
-                    content_type=MIMEType.TYPE_HTML
+                    content_type="text/html"
             ) as response:
                 response.send_file("index.html")
 
         @server.route("/update")
-        def update(request: HTTPRequest):
-            with HTTPResponse(
+        def update(request: Request):
+            with Response(
                     request,
-                    content_type=MIMEType.TYPE_HTML
+                    content_type="text/html"
             ) as response:
                 response.send_file("update.html")
 
         # === API ROUTES ===
 
         @server.route("/server-time")
-        def server_time(request: HTTPRequest):
-            with HTTPResponse(request) as response:
+        def server_time(request: Request):
+            with Response(request) as response:
                 localtime = time.localtime()
                 localminutes = str(localtime[4])
 
@@ -45,21 +46,21 @@ class RoutingProtocol:
                 response.send(data, content_type="text/plain")
 
         @server.route("/feeding-time")
-        def feeding_time(request: HTTPRequest):
-            with HTTPResponse(request) as response:
+        def feeding_time(request: Request):
+            with Response(request) as response:
                 last_feeding_data = getLastFeedingData()
                 next_feeding_time = getNextFeedingTime(last_feeding_data[1])
                 response.send(next_feeding_time, content_type="text/plain")
 
-        @server.route("/feed", HTTPMethod.POST)
-        def feed(request: HTTPRequest):
+        @server.route("/feed", methods.POST)
+        def feed(request: Request):
             dispenceFood()
 
-            with HTTPResponse(request) as response:
+            with Response(request) as response:
                 response.send("ok", content_type="text/plain")
 
-        @server.route("/set-feeding-time", HTTPMethod.POST)
-        def set_feeding_time(request: HTTPRequest):
+        @server.route("/set-feeding-time", methods.POST)
+        def set_feeding_time(request: Request):
             new_feeding_times = request.body
             new_feeding_times = new_feeding_times.split(',')
             sp = StorageProtocol()
@@ -72,11 +73,11 @@ class RoutingProtocol:
                 else:
                     sp.write("feeding_time.txt", feeding_time, "a")
 
-            with HTTPResponse(request) as response:
+            with Response(request) as response:
                 response.send("ok", content_type="text/plain")
 
         @server.route("/get-feeding-date")
-        def get_feeding_date(request: HTTPRequest):
-            with HTTPResponse(request) as response:
+        def get_feeding_date(request: Request):
+            with Response(request) as response:
                 last_feeding_data = getLastFeedingData()
                 response.send(last_feeding_data[0], content_type="text/plain")

@@ -31,7 +31,6 @@ def getLastFeedingData():
 
 
 def getNextFeedingTime(last_feed_time):
-
     feeding_times = sp.read("feeding_time.txt")
 
     last_feeding_index = 0
