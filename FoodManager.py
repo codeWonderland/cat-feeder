@@ -5,39 +5,66 @@ from StorageProtocol import StorageProtocol
 from StepperMotor import StepperMotor
 
 
-
 sp = StorageProtocol()
 sm = StepperMotor(board.GP0, board.GP1, board.GP2)
 
 
-def dispenceFood():
+def dispenceFood(feeding_time):
     current_time = time.localtime()
-    formatted_time = "{}/{}".format(current_time[1], current_time[2])
+    formatted_date = "{}/{}".format(current_time[1], current_time[2])
 
     sp.write(
-        "last_feed_date.txt", 
-        formatted_time
+        "last_feeding.txt",
+        formatted_date
+    )
+    sp.write(
+        "last_feeding.txt",
+        feeding_time,
+        "a"
     )
 
     sm.steps(2)
 
 
-def checkFeedTime():
-    current_time = time.localtime()
+def getLastFeedingData():
+    return sp.read("last_feeding.txt")
 
-    last_feed_date = sp.read("last_feed_date.txt")[0].split('/')
+
+def getNextFeedingTime(last_feed_time):
+
+    feeding_times = sp.read("feeding_time.txt")
+
+    last_feeding_index = 0
+    for feeding_time in feeding_times:
+        if feeding_time == last_feed_time:
+            break
+
+        last_feeding_index += 1
+
+    next_feeding_index = (last_feeding_index + 1) % len(feeding_times)
+
+    return feeding_times[next_feeding_index]
+
+
+def checkFeedTime():
+    last_feed_data = getLastFeedingData()
+    last_feed_date = last_feed_data[0].split('/')
     last_feed_month = int(last_feed_date[0])
     last_feed_day = int(last_feed_date[1])
-    
-    feeding_time = sp.read("feeding_time.txt")[0].split(':')
-    feeding_hour = int(feeding_time[0])
-    feeding_minute = int(feeding_time[1])
+    last_feed_time = last_feed_data[1]
 
+    next_feeding_time = getNextFeedingTime(last_feed_time)
+
+    split_feeding_time = next_feeding_time.split(':')
+    feeding_hour = int(split_feeding_time[0])
+    feeding_minute = int(split_feeding_time[1])
+
+    current_time = time.localtime()
     # ((a and b) or c or (d and e)) and f and g
-    if ((last_feed_month == 12 and current_time[1]) == 1 \
-        or last_feed_month < current_time[1] \
-        or last_feed_day < current_time[2]) \
-        and feeding_hour <= current_time[3] \
-        and feeding_minute <= current_time[4]:
-        
-        dispenceFood()
+    if ((last_feed_month == 12 and current_time[1]) == 1
+            or last_feed_month < current_time[1]
+            or last_feed_day < current_time[2]) \
+            and feeding_hour <= current_time[3] \
+            and feeding_minute <= current_time[4]:
+
+        dispenceFood(next_feeding_time)

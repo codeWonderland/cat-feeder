@@ -6,89 +6,77 @@ from adafruit_httpserver.request import HTTPRequest
 from adafruit_httpserver.response import HTTPResponse
 
 from StorageProtocol import StorageProtocol
-from FoodManager import dispenceFood
+from FoodManager import dispenceFood, getLastFeedingData, getNextFeedingTime
 
 
 class RoutingProtocol:
     def __init__(self, server):
+
+        # === HTML Routes ===
+
         @server.route("/")
         def base(request: HTTPRequest):
-            """
-            Serve the default index.html file.
-            """
-            with HTTPResponse(request, content_type=MIMEType.TYPE_HTML) as response:
+            with HTTPResponse(
+                    request,
+                    content_type=MIMEType.TYPE_HTML
+            ) as response:
                 response.send_file("index.html")
 
+        @server.route("/update")
+        def update(request: HTTPRequest):
+            with HTTPResponse(
+                    request,
+                    content_type=MIMEType.TYPE_HTML
+            ) as response:
+                response.send_file("update.html")
+
+        # === API ROUTES ===
 
         @server.route("/server-time")
-        def base(request: HTTPRequest):
+        def server_time(request: HTTPRequest):
             with HTTPResponse(request) as response:
                 localtime = time.localtime()
                 localminutes = str(localtime[4])
-                if len(localminutes) == 1: localminutes = '0' + localminutes
+
+                if len(localminutes) == 1:
+                    localminutes = '0' + localminutes
+
                 data = "{}:{}".format(localtime[3], localminutes)
-                print("Server time request:")
-                print(data)
                 response.send(data, content_type="text/plain")
 
-
         @server.route("/feeding-time")
-        def base(request: HTTPRequest):
+        def feeding_time(request: HTTPRequest):
             with HTTPResponse(request) as response:
-                sp = StorageProtocol()
-                feeding_time_array = sp.read("feeding_time.txt")
-                response.send(feeding_time_array[0], content_type="text/plain")
-
+                last_feeding_data = getLastFeedingData()
+                next_feeding_time = getNextFeedingTime(last_feeding_data[1])
+                response.send(next_feeding_time, content_type="text/plain")
 
         @server.route("/feed", HTTPMethod.POST)
-        def feed_fn(request: HTTPRequest):
-            print('/feed was pinged!')
-            print('response: 200 OK')
-
+        def feed(request: HTTPRequest):
             dispenceFood()
-            
+
             with HTTPResponse(request) as response:
                 response.send("ok", content_type="text/plain")
-
-
-        @server.route("/update")
-        def base(request: HTTPRequest):
-            """
-            Serve the default index.html file.
-            """
-            with HTTPResponse(request, content_type=MIMEType.TYPE_HTML) as response:
-                response.send_file("update.html")
-
 
         @server.route("/set-feeding-time", HTTPMethod.POST)
-        def base(request: HTTPRequest):
-            print("/set-feeding-time was pinged!")
-            new_feeding_time = request.body
-            print("New Time:")
-            print(request.body)
+        def set_feeding_time(request: HTTPRequest):
+            new_feeding_times = request.body
+            new_feeding_times = new_feeding_times.split(',')
             sp = StorageProtocol()
-            sp.write("feeding_time.txt", new_feeding_time)
+
+            first_entry = True
+            for feeding_time in new_feeding_times:
+                if first_entry:
+                    sp.write("feeding_time.txt", feeding_time)
+                    first_entry = False
+                else:
+                    sp.write("feeding_time.txt", feeding_time, "a")
 
             with HTTPResponse(request) as response:
                 response.send("ok", content_type="text/plain")
-
 
         @server.route("/get-feeding-date")
-        def base(request: HTTPRequest):
+        def get_feeding_date(request: HTTPRequest):
             with HTTPResponse(request) as response:
-                sp = StorageProtocol()
-                feeding_date_array = sp.read("last_feed_date.txt")
-                response.send(feeding_date_array[0], content_type="text/plain")
-
-
-        @server.route("/set-feeding-date", HTTPMethod.POST)
-        def base(request: HTTPRequest):
-            print("/set-feeding-date was pinged!")
-            new_feeding_date = request.body
-            print("New date:")
-            print(request.body)
-            sp = StorageProtocol()
-            sp.write("last_feed_date.txt", new_feeding_date)
-
-            with HTTPResponse(request) as response:
-                response.send("ok", content_type="text/plain")
+                last_feeding_data = getLastFeedingData()
+                response.send(last_feeding_data[0], content_type="text/plain")

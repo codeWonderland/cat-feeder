@@ -3,16 +3,11 @@ import supervisor
 
 class StorageProtocol:
     def __init__(self):
-        if supervisor.runtime.usb_connected:
-            self.write_active = False
-            
-        else:
-            # if we aren't connected via USB
-            # CircuitPython can write to the drive
-            storage.remount("/", False)
-            self.write_active = True
+        usb_mode = supervisor.runtime.usb_connected
+        self.write_active = not usb_mode
+        storage.remount("/", usb_mode)
 
-    
+
     def write(self, fileName, data, writeMethod = "w"):
         if not self.write_active: return
 
@@ -20,7 +15,7 @@ class StorageProtocol:
             file.write(data)
             file.close()
 
-    
+
     def read(self, fileName):
         data = []
         with open(fileName, "r") as file:

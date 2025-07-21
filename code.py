@@ -7,7 +7,6 @@ import time
 
 from adafruit_httpserver.server import HTTPServer
 from ServerRoutes import RoutingProtocol
-from StorageProtocol import StorageProtocol
 from FoodManager import checkFeedTime
 
 
@@ -46,7 +45,6 @@ while True:
             next_feedtime_check = current_time + 60
 
             checkFeedTime()
-
 
         # Process any waiting web requests
         server.poll()
