@@ -11,7 +11,7 @@ sm = StepperMotor(board.GP0, board.GP1, board.GP2)
 
 def dispenceFood(feeding_time):
     current_time = time.localtime()
-    formatted_date = "{}/{}".format(current_time[1], current_time[2])
+    formatted_date = "{}/{}\n".format(current_time[1], current_time[2])
 
     sp.write(
         "last_feeding.txt",
