@@ -48,13 +48,14 @@ def getNextFeedingTime(feeding_times, last_feed_time):
 
 
 def checkFeedTime():
+    schedule = getSchedule()
     last_feed_data = getLastFeedingData()
     last_feed_date = last_feed_data[0].split('/')
     last_feed_month = int(last_feed_date[0])
     last_feed_day = int(last_feed_date[1])
     last_feed_time = last_feed_data[1]
 
-    next_feeding_time = getNextFeedingTime(last_feed_time)
+    next_feeding_time = getNextFeedingTime(schedule, last_feed_time)
 
     split_feeding_time = next_feeding_time.split(':')
     feeding_hour = int(split_feeding_time[0])
@@ -62,12 +63,14 @@ def checkFeedTime():
 
     current_time = time.localtime()
 
-    last_feed_yesterday = (last_feed_month == 12 and current_time[1] == 1) \
-        or last_feed_month < current_time[1] \
-        or last_feed_day < current_time[2]
+    last_feed_yesterday = \
+        (last_feed_month == 12 and current_time.tm_mon == 1) \
+        or last_feed_month < current_time.tm_mon \
+        or last_feed_day < current_time.tm_mday
 
-    if feeding_hour <= current_time[3] and feeding_minute <= current_time[4]:
-        if last_feed_time == next_feeding_time:
+    if feeding_hour <= current_time.tm_hour \
+            and feeding_minute <= current_time.tm_min:
+        if last_feed_time == schedule[-1]:
             if last_feed_yesterday:
                 dispenceFood(next_feeding_time)
         else:
