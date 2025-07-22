@@ -30,9 +30,11 @@ def getLastFeedingData():
     return sp.read("last_feeding.txt")
 
 
-def getNextFeedingTime(last_feed_time):
-    feeding_times = sp.read("feeding_time.txt")
+def getSchedule():
+    return sp.read("feeding_time.txt")
 
+
+def getNextFeedingTime(feeding_times, last_feed_time):
     last_feeding_index = 0
     for feeding_time in feeding_times:
         if feeding_time == last_feed_time:
