@@ -81,3 +81,9 @@ class RoutingProtocol:
             with Response(request) as response:
                 last_feeding_data = getLastFeedingData()
                 response.send(last_feeding_data[0], content_type="text/plain")
+
+        @server.route("/get-feeding-time")
+        def get_feeding_time(request: Request):
+            with Response(request) as response:
+                last_feeding_data = getLastFeedingData()
+                response.send(last_feeding_data[1], content_type="text/plain")
